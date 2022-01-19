@@ -7,14 +7,14 @@
         <v-text-field
           v-model="search"
           append-icon="mdi-magnify"
-          label="Search"
+          label="Поиск"
           single-line
           hide-details
         ></v-text-field>
       </v-card-title>
       <v-data-table
         :loading="loading"
-        loading-text="Loading... Please wait"
+        loading-text="Загрузка... Пожалуста подождите"
         :headers="headers"
         :items="currency"
         :search="search"
@@ -31,17 +31,19 @@
         <template v-slot:item.actions="{ item }">
           <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
         </template>
+        <template v-slot:no-data> Добавте данные кнопочкой ADD </template>
       </v-data-table>
     </v-card>
   </div>
 </template>
 
 <script>
-
+import { mapActions } from "vuex";
 export default {
   name: "HelloWorld",
   data() {
     return {
+      initCurrency: ["USD", "EUR", "RUB"],
       loading: false,
       search: "",
       headers: [
@@ -58,12 +60,41 @@ export default {
       ],
     };
   },
+  async mounted() {
+    this.loading = true;
+    await this.getAllCurrency();
+    for (let abbreviation of this.initCurrency) {
+      const findItem = this.allCurrency.find(
+        (item) => item.Cur_Abbreviation == abbreviation
+      );
+      if (findItem) {
+        this.isDublicate(findItem); // проверка на дубликат перед добавлением
+      }
+    }
+    this.loading = false;
+  },
   computed: {
     currency() {
-      return this.$store.getters.get('currency');
-    }
+      return this.$store.getters.get("currency");
+    },
+    allCurrency() {
+      return this.$store.getters.get("allCurrency");
+    },
   },
-  methods: {},
+  methods: {
+    ...mapActions(["getAllCurrency", "isDublicate"]),
+    deleteItem(itemDelete) {
+      const position = this.currency.findIndex((item) => item == itemDelete);
+      if (position || position == 0) {
+        this.currency.splice(position, 1);
+        
+        this.$store.commit("set", {
+          name: "currency",
+          value: this.currency,
+        });
+      }
+    },
+  },
 };
 </script>
 

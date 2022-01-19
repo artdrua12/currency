@@ -23,8 +23,8 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn text>
-        <span class="mr-2">UPDATE CYRRENCY</span>
+      <v-btn text @click="getAllCurrency">
+        <span class="mr-2">GET ALL CURRENCY</span>
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
     </v-app-bar>
@@ -36,18 +36,21 @@
     <v-snackbar
       v-model="snackbar.run"
       :color="snackbar.color"
-      :timeout="3000"
+      :timeout="2000"
       right="right"
     >
       {{ snackbar.text }}
       <template v-slot:action="{ attrs }">
-        <v-btn dark text v-bind="attrs" @click="snackbar.run = false">Close</v-btn>
+        <v-btn dark text v-bind="attrs" @click="snackbar.run = false"
+          >Close</v-btn
+        >
       </template>
     </v-snackbar>
   </v-app>
 </template>
 
 <script>
+import { mapActions } from "vuex";
 import AllCurrency from "./components/AllCurrency";
 import CurrentCurrency from "./components/CurrentCurrency";
 
@@ -58,7 +61,6 @@ export default {
     AllCurrency,
     CurrentCurrency,
   },
-
   data: () => ({
     //
   }),
@@ -72,13 +74,18 @@ export default {
       },
     },
   },
+  methods: {
+    ...mapActions([
+      'getAllCurrency'
+    ]),
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 .cyrrency {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   grid-gap: 10px;
   background-color: rgba(116, 122, 120, 0.507);
   &_padding {

@@ -7,16 +7,16 @@
         <v-text-field
           v-model="search"
           append-icon="mdi-magnify"
-          label="Search"
+          label="Поиск"
           single-line
           hide-details
         ></v-text-field>
       </v-card-title>
       <v-data-table
         :loading="loading"
-        loading-text="Loading... Please wait"
+        loading-text="Загрузка... Пожалуста подождите"
         :headers="headers"
-        :items="tablesData"
+        :items="allCurrency"
         :search="search"
       >
         <template v-slot:item.Date="{ item }">
@@ -30,6 +30,9 @@
         </template>
         <template v-slot:item.actions="{ item }">
           <v-btn color="primary" @click="addItem(item)"> add</v-btn>
+        </template>
+        <template v-slot:no-data>
+          Произошла ошибка при загрузке данных, нажмите GET ALL CURRENCY.
         </template>
       </v-data-table>
     </v-card>
@@ -57,27 +60,17 @@ export default {
         { text: "Курс", value: "Cur_OfficialRate" },
         { text: "", value: "actions", sortable: false },
       ],
-      tablesData: [],
     };
   },
   computed: {
-    currency() {
+    allCurrency() {
       return this.$store.getters.get("allCurrency");
     },
   },
-  async mounted() {
-    this.loading = true;
-    await this.getData();
-    this.tablesData = this.currency;
-    this.loading = false;
-  },
   methods: {
-    ...mapActions({
-      getData: "getAllCurrency", // проксирует `this.add()` в `this.$store.dispatch('increment')`
-    }),
+    ...mapActions(["isDublicate"]),
     addItem(item) {
-      console.log("i", item);
-      this.$store.commit("setArray", item);
+      this.isDublicate(item);
     },
   },
 };

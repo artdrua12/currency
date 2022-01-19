@@ -6,51 +6,41 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     currency: [],
-    allCurrency: ["all"],
+    allCurrency: [],
     message: { color: 'info', text: 'default', run: false }
   },
   getters: {
     get: state => type => {
       return state[type]
-    },
-    currency: state => {
-      return state.currency
-    },
-    allCurrency: state => {
-      return state.allCurrency
     }
   },
   mutations: {
     set(state, obj) {
       state[obj.name] = obj.value;
-    },
-    setMessage(state, obj) {
-      Vue.set(state, 'message', obj);
-    },
-    setArray(state, payload) {
-      state.currency = [...state.currency, payload];
-      console.log('s', state.currency);
     }
   },
   actions: {
-    async getAllCurrency({ dispatch, commit }) {
+    async getAllCurrency({ commit }) {
       try {
         const response = await fetch(
           `https://www.nbrb.by/api/exrates/rates?periodicity=0`
         );
         const res = await response.json();
         commit('set', { name: 'allCurrency', value: res });
-        commit('setMessage', { color: 'green', text: 'Данные валют успешно загружены', run: true });
-        dispatch('initArray');
+        commit('set', { name: 'message', value: { color: 'green', text: 'Данные валют успешно загружены', run: true } });
       } catch (e) {
-        commit('setMessage', { color: 'error', text: 'Ошибка запроса валют', run: true });
+        commit('set', { name: 'message', value: { color: 'error', text: 'Ошибка запроса валют', run: true } });
       }
     },
-    initArray({ commit }) {
-      // const initAbbreviation = ['USD', 'EUR'];
-      console.log(this.state);
-      commit('set', { name: 'currency', value: "d" });
-    }
+    isDublicate({ commit, state }, findItem) {
+      const dublicate = state.currency.find(item => item == findItem);
 
+      if (dublicate) {
+        commit('set', { name: 'message', value: { color: 'orange', text: 'Валюта уже добавлена', run: true } });
+      } else {
+        const updateArrayCurrency = [...state.currency, findItem];
+        commit('set', { name: 'currency', value: updateArrayCurrency });
+      }
+    },
   }
 })
