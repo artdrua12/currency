@@ -2,7 +2,7 @@
   <div class="tables">
     <v-card>
       <v-card-title>
-        CYRRENCY TODAY
+        Все валюты
         <v-spacer></v-spacer>
         <v-text-field
           v-model="search"
@@ -21,12 +21,15 @@
       >
         <template v-slot:item.Date="{ item }">
           {{
-            Intl.DateTimeFormat("ru", {
+            Intl.DateTimeFormat("ru-RU", {
               day: "numeric",
               month: "long",
               year: "numeric",
             }).format(new Date(item.Date))
           }}
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <v-btn color="primary" @click="addItem(item)"> add</v-btn>
         </template>
       </v-data-table>
     </v-card>
@@ -34,7 +37,6 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import { mapActions } from "vuex";
 
 export default {
@@ -53,41 +55,31 @@ export default {
         { text: "Код валюты", value: "Cur_Abbreviation" },
         { text: "Название", value: "Cur_Name" },
         { text: "Курс", value: "Cur_OfficialRate" },
+        { text: "", value: "actions", sortable: false },
       ],
       tablesData: [],
     };
   },
-  computed: mapState({
-    count: (state) => state.currency,
-  }),
+  computed: {
+    currency() {
+      return this.$store.getters.get("allCurrency");
+    },
+  },
   async mounted() {
     this.loading = true;
     await this.getData();
-    this.tablesData = this.count;
+    this.tablesData = this.currency;
     this.loading = false;
   },
   methods: {
     ...mapActions({
-      getData: "getCurrency", // проксирует `this.add()` в `this.$store.dispatch('increment')`
+      getData: "getAllCurrency", // проксирует `this.add()` в `this.$store.dispatch('increment')`
     }),
-    async getFork(item) {
-      try {
-        this.loading = true;
-        await this.$store.dispatch("getFork", item);
-        this.forks = await this.$store.state.forks;
-        this.dialog = true;
-        this.loading = false;
-      } catch (e) {
-        console.log(e);
-      } finally {
-        this.loading = false;
-      }
-    },
-    async addFaforite(item) {
-      this.loadFavor = true;
-      await this.$store.dispatch("addFavorites", item);
-      this.loadFavor = false;
+    addItem(item) {
+      console.log("i", item);
+      this.$store.commit("setArray", item);
     },
   },
 };
 </script>
+
